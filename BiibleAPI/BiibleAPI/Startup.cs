@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using BiibleAPI.Util;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BiibleAPI
 {
@@ -21,9 +27,43 @@ namespace BiibleAPI
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddHttpContextAccessor();
 
+            services.AddTransient<AppDb>(_ => new AppDb(Configuration["ConnectionStrings:DefaultConnection"]));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "Biible API", Version = "v1" });
+            });
+
+            //especifica o esquema usado para autenticacao do tipo Bearer e
+            //define configurações como chave,algoritmo,validade, data expiracao...
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "macoratti.net",
+                    ValidAudience = "macoratti.net",
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["SecurityKey"]))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine("Token inválido..:. " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("Toekn válido...: " + context.SecurityToken);
+                        return Task.CompletedTask;
+                    }
+                };
             });
         }
 
@@ -40,6 +80,7 @@ namespace BiibleAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseMvc();
 
             app.UseSwagger();

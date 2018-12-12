@@ -24,7 +24,7 @@ namespace BiibleWEB.Models
         public List<ClienteModel> ListarTodosClientes()
         {
             List<ClienteModel> retorno = new List<ClienteModel>();
-            string json = WebAPI.RequestGET("listagem", string.Empty);
+            string json = WebAPI.RequestGET("buscartodos", string.Empty);
             retorno = JsonConvert.DeserializeObject<List<ClienteModel>>(json);
             return retorno;
         }
@@ -32,7 +32,7 @@ namespace BiibleWEB.Models
         public ClienteModel Carregar(int? id)
         {
             ClienteModel retorno = new ClienteModel();
-            string json = WebAPI.RequestGET("cliente", id.ToString());
+            string json = WebAPI.RequestGET("buscarregistro", id.ToString());
             retorno = JsonConvert.DeserializeObject<ClienteModel>(json);
             return retorno;
         }
@@ -42,17 +42,17 @@ namespace BiibleWEB.Models
             string jsonData = JsonConvert.SerializeObject(this);
             if (Id == 0)
             {
-                string json = WebAPI.RequestPOST("save", jsonData);
+                string json = WebAPI.RequestPOST("salvar", jsonData);
             }
             else
             {
-                string json = WebAPI.RequestPUT("update/" + Id, jsonData);
+                string json = WebAPI.RequestPUT("alterar/" + Id, jsonData);
             }
         }
 
         public void Excluir(int id)
         {
-            string json = WebAPI.RequestDELETE("delete", id.ToString());
+            string json = WebAPI.RequestDELETE("deletar", id.ToString());
         }
     }
 }

@@ -1,96 +1,94 @@
 ﻿using BiibleAPI.Models;
 using BiibleAPI.Util;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BiibleAPI.Controllers
 {
     [Route("api/[controller]")]
+    //[Authorize()]
     [ApiController]
     public class ClienteController : ControllerBase
     {
-        private readonly Autenticacao AutenticacaoServico;
+        private IConfiguration _configuration;
 
-        public ClienteController(IHttpContextAccessor context)
+        public ClienteController(IConfiguration configuration)
         {
-            AutenticacaoServico = new Autenticacao(context);
+            _configuration = configuration;
         }
 
         [HttpGet]
-        [Route("listagem")]
-        public List<ClienteModel> Listagem()
+        [Route("BuscarRegistro/{id}")]
+        public async Task<IActionResult> BuscarRegistro(int id)
         {
-            return new ClienteModel().Listagem();
+            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            {
+                ClienteModel result = await new ClienteModel(db).BuscarRegistro(id);
+                if (result == null)
+                {
+                    return new NotFoundResult();
+                }
+
+                return new OkObjectResult(result);
+            }
         }
 
         [HttpGet]
-        [Route("cliente/{id}")]
-        public ClienteModel GetById(int id)
+        [Route("buscartodos")]
+        public async Task<IActionResult> BuscarTodos()
         {
-            return new ClienteModel().RetornarCliente(id);
+            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            {
+                List<ClienteModel> result = await new ClienteModel(db).BuscarTodos();
+                return new OkObjectResult(result);
+            }
         }
 
         [HttpPost]
-        [Route("save")]
-        public ReturnAllServices Save([FromBody] ClienteModel dados)
+        [Route("salvar")]
+        public async Task<IActionResult> Salvar([FromBody]ClienteModel body)
         {
-            ReturnAllServices retorno = new ReturnAllServices();
-            try
+            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
             {
-                AutenticacaoServico.Autenticar();
-                dados.Save();
-                retorno.Result = true;
-                retorno.ErrorMessage = "";
+                body.Db = db;
+                await body.Salvar();
+                return new OkObjectResult(body);
             }
-            catch (Exception ex)
-            {
-                retorno.Result = false;
-                retorno.ErrorMessage = "Erro ao tentar salvar cliente: " + ex.Message;
-            }
-            return retorno;
         }
 
         [HttpPut]
-        [Route("update/{id}")]
-        public ReturnAllServices Update(int id, [FromBody] ClienteModel dados)
+        [Route("alterar/{id}")]
+        public async Task<IActionResult> Alterar(int id, [FromBody]ClienteModel body)
         {
-            ReturnAllServices retorno = new ReturnAllServices();
-            try
+            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
             {
-                AutenticacaoServico.Autenticar();
-                dados.Id = id;
-                dados.Update();
-                retorno.Result = true;
-                retorno.ErrorMessage = "";
+                ClienteModel result = await new ClienteModel(db).BuscarRegistro(id);
+                if (result == null)
+                {
+                    return new NotFoundResult();
+                }
+                await result.Alterar();
+                return new OkObjectResult(result);
             }
-            catch (Exception ex)
-            {
-                retorno.Result = false;
-                retorno.ErrorMessage = "Erro ao tentar atualizar cliente: " + ex.Message;
-            }
-            return retorno;
         }
 
         [HttpDelete]
-        [Route("delete/{id}")]
-        public ReturnAllServices Delete(int id)
+        [Route("deletar/{id}")]
+        public async Task<IActionResult> Deletar(int id)
         {
-            ReturnAllServices retorno = new ReturnAllServices();
-            try
+            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
             {
-                AutenticacaoServico.Autenticar();
-                new ClienteModel().Delete(id);
-                retorno.Result = true;
-                retorno.ErrorMessage = "Cliente excluído com sucesso!";
+                ClienteModel result = await new ClienteModel(db).BuscarRegistro(id);
+                if (result == null)
+                {
+                    return new NotFoundResult();
+                }
+
+                await result.Deletar();
+                return new OkResult();
             }
-            catch (Exception ex)
-            {
-                retorno.Result = false;
-                retorno.ErrorMessage = ex.Message;
-            }
-            return retorno;
         }
     }
 }

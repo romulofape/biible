@@ -1,131 +1,122 @@
 ﻿using BiibleAPI.Util;
+using Dapper.Contrib.Extensions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace BiibleAPI.Models
 {
+    [Table("cliente")]
     public class ClienteModel
     {
-        public int Id { get; set; }
-        public string Nome { get; set; }
-        public string Data_Cadastro { get; set; }
-        public string Cpf_Cnpj { get; set; }
-        public string Data_Nascimento { get; set; }
-        public string Telefone { get; set; }
-        public string Email { get; set; }
-        public string Cep { get; set; }
-        public string Logradouro { get; set; }
-        public string Numero { get; set; }
-        public string Bairro { get; set; }
-        public string Complemento { get; set; }
-        public string Cidade { get; set; }
-        public string UF { get; set; }
+        [JsonIgnore]
+        public AppDb Db { get; set; }
 
-
-        public void Save()
+        public ClienteModel(AppDb db = null)
         {
-            DAL objDAL = new DAL();
-
-            string sql = "INSERT INTO cliente(nome,data_cadastro,cpf_cnpj,data_nascimento,telefone,email,cep,logradouro,numero,bairro,complemento,cidade,uf)" +
-                        $"VALUES('{Nome}',{DateTime.Parse(Data_Cadastro).ToString("yyyy/MM/dd")},'{Cpf_Cnpj}',{DateTime.Parse(Data_Nascimento).ToString("yyyy/MM/dd")},'{Telefone}','{Email}','{Cep}','{Logradouro}','{Numero}','{Bairro}','{Complemento}','{Cidade}','{UF}')";
-
-            objDAL.ExecutarComandoSQL(sql);
-        }
-
-        public void Update()
-        {
-            DAL objDAL = new DAL();
-
-            string sql = "UPDATE cliente set " +
-                         $" nome = '{Nome}', " +
-                         $" data_cadastro = '{DateTime.Parse(Data_Cadastro).ToString("yyyy/MM/dd")}', " +
-                         $" cpf_cnpj = '{Cpf_Cnpj}', " +
-                         $" data_nascimento = '{DateTime.Parse(Data_Nascimento).ToString("yyyy/MM/dd")}', " +
-                         $" telefone = '{Telefone}', " +
-                         $" email = '{Email}',  " +
-                         $" cep = '{Cep}',  " +
-                         $" logradouro = '{Logradouro}'," +
-                         $" numero = '{Numero}', " +
-                         $" bairro = '{Bairro}', " +
-                         $" complemento= '{Complemento}', " +
-                         $" cidade= '{Cidade}', " +
-                         $" uf = '{UF}' " +
-                         $"WHERE id={Id}";
-
-            objDAL.ExecutarComandoSQL(sql);
-        }
-
-        public void Delete(int id)
-        {
-            DAL objDAL = new DAL();
-
-            string sql = $"delete from cliente where id = {id}";
-
-            objDAL.ExecutarComandoSQL(sql);
-        }
-
-        public List<ClienteModel> Listagem()
-        {
-            List<ClienteModel> lista = new List<ClienteModel>();
-            ClienteModel item;
-
-            DAL objDAL = new DAL();
-
-            string sql = "select * from cliente order by nome asc";
-            DataTable dados = objDAL.RetornarDataTable(sql);
-
-            for (int i = 0; i < dados.Rows.Count; i++)
+            Db = db;
+            if (db != null)
             {
-                item = new ClienteModel()
-                {
-                    Id = int.Parse(dados.Rows[i]["Id"].ToString()),
-                    Nome = dados.Rows[i]["Nome"].ToString(),
-                    Data_Cadastro = DateTime.Parse(dados.Rows[i]["data_cadastro"].ToString()).ToString("dd/MM/yyyy"),
-                    Cpf_Cnpj = dados.Rows[i]["cpf_cnpj"].ToString(),
-                    Data_Nascimento = DateTime.Parse(dados.Rows[i]["data_nascimento"].ToString()).ToString("dd/MM/yyyy"),
-                    Telefone = dados.Rows[i]["telefone"].ToString(),
-                    Email = dados.Rows[i]["email"].ToString(),
-                    Cep = dados.Rows[i]["cep"].ToString(),
-                    Logradouro = dados.Rows[i]["logradouro"].ToString(),
-                    Numero = dados.Rows[i]["numero"].ToString(),
-                    Bairro = dados.Rows[i]["bairro"].ToString(),
-                    Cidade = dados.Rows[i]["cidade"].ToString(),
-                    UF = dados.Rows[i]["uf"].ToString()
-                };
-                lista.Add(item);
+                Db.AbriConexao();
             }
-            return lista;
         }
 
-        public ClienteModel RetornarCliente(int id)
+        [ExplicitKey]
+        public int id { get; set; }
+        public string nome { get; set; }
+        public DateTime data_cadastro { get; set; }
+        public string cpf_cnpj { get; set; }
+        public DateTime data_nascimento { get; set; }
+        public string telefone { get; set; }
+        public string email { get; set; }
+        public string cep { get; set; }
+        public string logradouro { get; set; }
+        public string numero { get; set; }
+        public string bairro { get; set; }
+        public string complemento { get; set; }
+        public string cidade { get; set; }
+        public string uf { get; set; }
+
+        public async Task Salvar()
         {
-            ClienteModel item;
+            string sql = "INSERT INTO cliente(nome,data_cadastro,cpf_cnpj,data_nascimento,telefone,email,cep,logradouro,numero,bairro,complemento,cidade,uf)" +
+                        $"VALUES('{nome}','{data_cadastro}','{cpf_cnpj}','{data_nascimento}','{telefone}','{email}','{cep}','{logradouro}','{numero}','{bairro}','{complemento}','{cidade}','{uf}')";
 
-            DAL objDAL = new DAL();
+            id = await Db.ExecutarComando(sql);
+        }
 
+        public async Task Alterar()
+        {
+            string sql = "UPDATE cliente set " +
+                         $" nome = '{nome}', " +
+                         $" data_cadastro = '{data_cadastro}', " +
+                         $" cpf_cnpj = '{cpf_cnpj}', " +
+                         $" data_nascimento = '{data_nascimento}', " +
+                         $" telefone = '{telefone}', " +
+                         $" email = '{email}',  " +
+                         $" cep = '{cep}',  " +
+                         $" logradouro = '{logradouro}'," +
+                         $" numero = '{numero}', " +
+                         $" bairro = '{bairro}', " +
+                         $" complemento= '{complemento}', " +
+                         $" cidade= '{cidade}', " +
+                         $" uf = '{uf}' " +
+                         $"WHERE id={id}";
+
+            await Db.ExecutarComando(sql);
+        }
+
+        public async Task Deletar()
+        {
+            string sql = $"delete from cliente where id = {id}";
+            await Db.ExecutarComando(sql);
+        }
+
+        public async Task<ClienteModel> BuscarRegistro(int id)
+        {
             string sql = $"select * from cliente where id = {id}";
-            DataTable dados = objDAL.RetornarDataTable(sql);
 
-            item = new ClienteModel()
+            List<ClienteModel> result = await RetornoBuscar(await Db.ExecutarSQL(sql));
+            return result.Count > 0 ? result[0] : null;
+        }
+
+        public async Task<List<ClienteModel>> BuscarTodos()
+        {
+            string sql = @"select * from cliente order by nome asc";
+
+            return await RetornoBuscar(await Db.ExecutarSQL(sql));
+        }
+
+        private async Task<List<ClienteModel>> RetornoBuscar(DbDataReader reader)
+        {
+            List<ClienteModel> posts = new List<ClienteModel>();
+            using (reader)
             {
-                Id = int.Parse(dados.Rows[0]["Id"].ToString()),
-                Nome = dados.Rows[0]["Nome"].ToString(),
-                Data_Cadastro = DateTime.Parse(dados.Rows[0]["data_cadastro"].ToString()).ToString("dd/MM/yyyy"),
-                Cpf_Cnpj = dados.Rows[0]["cpf_cnpj"].ToString(),
-                Data_Nascimento = DateTime.Parse(dados.Rows[0]["data_nascimento"].ToString()).ToString("dd/MM/yyyy"),
-                Telefone = dados.Rows[0]["telefone"].ToString(),
-                Email = dados.Rows[0]["email"].ToString(),
-                Cep = dados.Rows[0]["cep"].ToString(),
-                Logradouro = dados.Rows[0]["logradouro"].ToString(),
-                Complemento = dados.Rows[0]["complemento"].ToString(),
-                Numero = dados.Rows[0]["numero"].ToString(),
-                Bairro = dados.Rows[0]["bairro"].ToString(),
-                Cidade = dados.Rows[0]["cidade"].ToString(),
-                UF = dados.Rows[0]["uf"].ToString()
-            };
-
-            return item;
+                while (await reader.ReadAsync())
+                {
+                    ClienteModel post = new ClienteModel(Db)
+                    {
+                        id = await reader.GetFieldValueAsync<int>(reader.GetOrdinal("id")),
+                        nome = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("nome")),
+                        data_cadastro = await reader.GetFieldValueAsync<DateTime>(reader.GetOrdinal("data_cadastro")),
+                        cpf_cnpj = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("cpf_cnpj")),
+                        data_nascimento = await reader.GetFieldValueAsync<DateTime>(reader.GetOrdinal("data_nascimento")),
+                        telefone = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("telefone")),
+                        email = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("email")),
+                        cep = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("cep")),
+                        logradouro = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("logradouro")),
+                        numero = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("numero")),
+                        bairro = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("bairro")),
+                        complemento = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("complemento")),
+                        cidade = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("cidade")),
+                        uf = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("uf"))
+                    };
+                    posts.Add(post);
+                }
+            }
+            return posts;
         }
     }
 }

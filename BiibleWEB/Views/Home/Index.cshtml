@@ -4,6 +4,7 @@
     <thead>
         <tr>
             <td>#</td>
+            <td>#</td>
             <td>Id</td>
             <td>Nome</td>
         </tr>
@@ -12,12 +13,12 @@
 
         @foreach (var item in (List<ClienteModel>)ViewBag.ListaClientes)
         {
-        <tr>
-            <td style="width:80px"><button class="btn btn-default" onclick="registrar(@item.Id.ToString())">Editar</button></td>
-            <td style="width:80px"><button class="btn btn-danger" onclick="excluir(@item.Id.ToString())">Excluir</button></td>
-            <td>@item.Id.ToString()</td>
-            <td>@item.Nome.ToString()</td>
-        </tr>
+            <tr>
+                <td style="width:80px"><button class="btn btn-default" onclick="registrar(@item.Id.ToString())">Editar</button></td>
+                <td style="width:80px"><button class="btn btn-danger" onclick="excluir(@item.Id.ToString())">Excluir</button></td>
+                <td>@item.Id.ToString()</td>
+                <td>@item.Nome.ToString()</td>
+            </tr>
         }
 
     </tbody>
