@@ -12,34 +12,33 @@ namespace BiibleAPI.Controllers
     [ApiController]
     public class ClienteController : ControllerBase
     {
-        private IConfiguration _configuration;
+        private string _cnxBiible;
 
         public ClienteController(IConfiguration configuration)
         {
-            _configuration = configuration;
+            _cnxBiible = configuration.GetConnectionString("cnxBiible");
         }
 
         [HttpGet]
         [Route("BuscarRegistro/{id}")]
         public async Task<IActionResult> BuscarRegistro(int id)
         {
-            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            using (AppDb db = new AppDb(_cnxBiible))
             {
                 ClienteModel result = await new ClienteModel(db).BuscarRegistro(id);
                 if (result == null)
                 {
                     return new NotFoundResult();
                 }
-
                 return new OkObjectResult(result);
             }
         }
 
         [HttpGet]
-        [Route("buscartodos")]
+        [Route("BuscarTodos")]
         public async Task<IActionResult> BuscarTodos()
         {
-            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            using (AppDb db = new AppDb(_cnxBiible))
             {
                 List<ClienteModel> result = await new ClienteModel(db).BuscarTodos();
                 return new OkObjectResult(result);
@@ -47,10 +46,10 @@ namespace BiibleAPI.Controllers
         }
 
         [HttpPost]
-        [Route("salvar")]
+        [Route("Salvar")]
         public async Task<IActionResult> Salvar([FromBody]ClienteModel body)
         {
-            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            using (AppDb db = new AppDb(_cnxBiible))
             {
                 body.Db = db;
                 await body.Salvar();
@@ -59,33 +58,33 @@ namespace BiibleAPI.Controllers
         }
 
         [HttpPut]
-        [Route("alterar/{id}")]
+        [Route("Alterar/{id}")]
         public async Task<IActionResult> Alterar(int id, [FromBody]ClienteModel body)
         {
-            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            using (AppDb db = new AppDb(_cnxBiible))
             {
-                ClienteModel result = await new ClienteModel(db).BuscarRegistro(id);
-                if (result == null)
+                body.Db = db;
+                body.id = id;
+                if (await body.BuscarRegistro(id) == null)
                 {
                     return new NotFoundResult();
                 }
-                await result.Alterar();
-                return new OkObjectResult(result);
+                await body.Alterar();
+                return new OkObjectResult(body);
             }
         }
 
         [HttpDelete]
-        [Route("deletar/{id}")]
+        [Route("Deletar/{id}")]
         public async Task<IActionResult> Deletar(int id)
         {
-            using (AppDb db = new AppDb(_configuration.GetConnectionString("cnxBiible")))
+            using (AppDb db = new AppDb(_cnxBiible))
             {
                 ClienteModel result = await new ClienteModel(db).BuscarRegistro(id);
                 if (result == null)
                 {
                     return new NotFoundResult();
                 }
-
                 await result.Deletar();
                 return new OkResult();
             }

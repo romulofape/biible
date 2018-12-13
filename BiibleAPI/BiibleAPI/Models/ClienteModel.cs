@@ -39,10 +39,36 @@ namespace BiibleAPI.Models
         public string cidade { get; set; }
         public string uf { get; set; }
 
+        public async Task<List<ClienteModel>> BuscarTodos()
+        {
+            string sql = @"select * from cliente order by nome asc";
+
+            return await RetornoBuscar(await Db.ExecutarSQL(sql));
+        }
+
+        public async Task<ClienteModel> BuscarRegistro(int id)
+        {
+            string sql = $"select * from cliente where id = {id}";
+
+            List<ClienteModel> result = await RetornoBuscar(await Db.ExecutarSQL(sql));
+            return result.Count > 0 ? result[0] : null;
+        }
+
         public async Task Salvar()
         {
-            string sql = "INSERT INTO cliente(nome,data_cadastro,cpf_cnpj,data_nascimento,telefone,email,cep,logradouro,numero,bairro,complemento,cidade,uf)" +
-                        $"VALUES('{nome}','{data_cadastro}','{cpf_cnpj}','{data_nascimento}','{telefone}','{email}','{cep}','{logradouro}','{numero}','{bairro}','{complemento}','{cidade}','{uf}')";
+            string sql = "INSERT INTO cliente(nome, data_cadastro, cpf_cnpj, data_nascimento, " +
+                             "telefone, email, cep, logradouro, numero, bairro, complemento, cidade, uf) " +
+                            $"VALUES('{nome}', " +
+                            $"'{data_cadastro.ToString("yyyy-MM-dd")}'," +
+                            $"'{cpf_cnpj}'," +
+                            $"'{data_nascimento.ToString("yyyy-MM-dd")}'," +
+                            $"'{telefone}','{email}'," +
+                            $"'{cep}','{logradouro}'," +
+                            $"'{numero}'," +
+                            $"'{bairro}'," +
+                            $"'{complemento}'," +
+                            $"'{cidade}'," +
+                            $"'{uf}')";
 
             id = await Db.ExecutarComando(sql);
         }
@@ -51,9 +77,9 @@ namespace BiibleAPI.Models
         {
             string sql = "UPDATE cliente set " +
                          $" nome = '{nome}', " +
-                         $" data_cadastro = '{data_cadastro}', " +
+                         $" data_cadastro = '{data_cadastro.ToString("yyyy-MM-dd")}', " +
                          $" cpf_cnpj = '{cpf_cnpj}', " +
-                         $" data_nascimento = '{data_nascimento}', " +
+                         $" data_nascimento = '{data_nascimento.ToString("yyyy-MM-dd")}', " +
                          $" telefone = '{telefone}', " +
                          $" email = '{email}',  " +
                          $" cep = '{cep}',  " +
@@ -74,29 +100,14 @@ namespace BiibleAPI.Models
             await Db.ExecutarComando(sql);
         }
 
-        public async Task<ClienteModel> BuscarRegistro(int id)
-        {
-            string sql = $"select * from cliente where id = {id}";
-
-            List<ClienteModel> result = await RetornoBuscar(await Db.ExecutarSQL(sql));
-            return result.Count > 0 ? result[0] : null;
-        }
-
-        public async Task<List<ClienteModel>> BuscarTodos()
-        {
-            string sql = @"select * from cliente order by nome asc";
-
-            return await RetornoBuscar(await Db.ExecutarSQL(sql));
-        }
-
         private async Task<List<ClienteModel>> RetornoBuscar(DbDataReader reader)
         {
-            List<ClienteModel> posts = new List<ClienteModel>();
+            List<ClienteModel> lista = new List<ClienteModel>();
             using (reader)
             {
                 while (await reader.ReadAsync())
                 {
-                    ClienteModel post = new ClienteModel(Db)
+                    ClienteModel registro = new ClienteModel(Db)
                     {
                         id = await reader.GetFieldValueAsync<int>(reader.GetOrdinal("id")),
                         nome = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("nome")),
@@ -113,10 +124,10 @@ namespace BiibleAPI.Models
                         cidade = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("cidade")),
                         uf = await reader.GetFieldValueAsync<string>(reader.GetOrdinal("uf"))
                     };
-                    posts.Add(post);
+                    lista.Add(registro);
                 }
             }
-            return posts;
+            return lista;
         }
     }
 }
