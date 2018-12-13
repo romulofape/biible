@@ -1,11 +1,8 @@
-﻿using Dapper;
-using Biible.Models;
+﻿using Biible.Models;
+using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
+using MySql.Data.MySqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,12 +21,12 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                role.Id = await connection.QuerySingleAsync<int>($@"INSERT INTO [ApplicationRole] ([Name], [NormalizedName])
+                role.Id = await connection.QuerySingleAsync<int>($@"INSERT INTO `ApplicationRole` (`Name`, `NormalizedName`)
                     VALUES (@{nameof(ApplicationRole.Name)}, @{nameof(ApplicationRole.NormalizedName)});
-                    SELECT CAST(SCOPE_IDENTITY() as int)", role);
+                    SELECT LAST_INSERT_ID()", role);
             }
 
             return IdentityResult.Success;
@@ -39,13 +36,13 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($@"UPDATE [ApplicationRole] SET
-                    [Name] = @{nameof(ApplicationRole.Name)},
-                    [NormalizedName] = @{nameof(ApplicationRole.NormalizedName)}
-                    WHERE [Id] = @{nameof(ApplicationRole.Id)}", role);
+                await connection.ExecuteAsync($@"UPDATE `ApplicationRole` SET
+                    `Name` = @{nameof(ApplicationRole.Name)},
+                    `NormalizedName` = @{nameof(ApplicationRole.NormalizedName)}
+                    WHERE `Id` = @{nameof(ApplicationRole.Id)}", role);
             }
 
             return IdentityResult.Success;
@@ -55,10 +52,10 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($"DELETE FROM [ApplicationRole] WHERE [Id] = @{nameof(ApplicationRole.Id)}", role);
+                await connection.ExecuteAsync($"DELETE FROM `ApplicationRole` WHERE `Id` = @{nameof(ApplicationRole.Id)}", role);
             }
 
             return IdentityResult.Success;
@@ -95,11 +92,11 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM [ApplicationRole]
-                    WHERE [Id] = @{nameof(roleId)}", new { roleId });
+                return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM `ApplicationRole`
+                    WHERE `Id` = @{nameof(roleId)}", new { roleId });
             }
         }
 
@@ -107,11 +104,11 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM [ApplicationRole]
-                    WHERE [NormalizedName] = @{nameof(normalizedRoleName)}", new { normalizedRoleName });
+                return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM `ApplicationRole`
+                    WHERE `NormalizedName` = @{nameof(normalizedRoleName)}", new { normalizedRoleName });
             }
         }
 

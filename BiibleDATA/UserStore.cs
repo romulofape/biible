@@ -1,13 +1,12 @@
 ﻿using Biible.Models;
+using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using System;
+using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
-using System.Data.SqlClient;
 
 namespace Biible.Data
 {
@@ -30,20 +29,20 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
 
-                var query = $@"INSERT INTO [ApplicationUser] 
-                                ([UserName], 
-                                    [NormalizedUserName], 
-                                    [Email],
-                                    [NormalizedEmail], 
-                                    [EmailConfirmed], 
-                                    [PasswordHash], 
-                                    [PhoneNumber], 
-                                    [PhoneNumberConfirmed], 
-                                    [TwoFactorEnabled])
+                string query = $@"INSERT INTO `ApplicationUser` 
+                                (   `UserName`, 
+                                    `NormalizedUserName`, 
+                                    `Email`,
+                                    `NormalizedEmail`, 
+                                    `EmailConfirmed`, 
+                                    `PasswordHash`, 
+                                    `PhoneNumber`, 
+                                    `PhoneNumberConfirmed`, 
+                                    `TwoFactorEnabled`)
                                 VALUES (
                                     @{nameof(ApplicationUser.UserName)}, 
                                     @{nameof(ApplicationUser.NormalizedUserName)}, 
@@ -54,7 +53,7 @@ namespace Biible.Data
                                     @{nameof(ApplicationUser.PhoneNumber)}, 
                                     @{nameof(ApplicationUser.PhoneNumberConfirmed)}, 
                                     @{nameof(ApplicationUser.TwoFactorEnabled)});
-                                SELECT CAST(SCOPE_IDENTITY() as int)";
+                                SELECT LAST_INSERT_ID()";
 
                 user.Id = await connection.QuerySingleAsync<int>(query, user);
             }
@@ -66,10 +65,10 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($"DELETE FROM [ApplicationUser] WHERE [Id] = @{nameof(ApplicationUser.Id)}", user);
+                await connection.ExecuteAsync($"DELETE FROM `ApplicationUser` WHERE `Id` = @{nameof(ApplicationUser.Id)}", user);
             }
 
             return IdentityResult.Success;
@@ -79,11 +78,11 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
-                    WHERE [Id] = @{nameof(userId)}", new { userId });
+                return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM `ApplicationUser`
+                    WHERE `Id` = @{nameof(userId)}", new { userId });
             }
         }
 
@@ -91,11 +90,11 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
-                    WHERE [NormalizedUserName] = @{nameof(normalizedUserName)}", new { normalizedUserName });
+                return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM `ApplicationUser`
+                    WHERE UserName = @{nameof(normalizedUserName)}", new { normalizedUserName });
             }
         }
 
@@ -130,20 +129,20 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($@"UPDATE [ApplicationUser] SET
-                    [UserName] = @{nameof(ApplicationUser.UserName)},
-                    [NormalizedUserName] = @{nameof(ApplicationUser.NormalizedUserName)},
-                    [Email] = @{nameof(ApplicationUser.Email)},
-                    [NormalizedEmail] = @{nameof(ApplicationUser.NormalizedEmail)},
-                    [EmailConfirmed] = @{nameof(ApplicationUser.EmailConfirmed)},
-                    [PasswordHash] = @{nameof(ApplicationUser.PasswordHash)},
-                    [PhoneNumber] = @{nameof(ApplicationUser.PhoneNumber)},
-                    [PhoneNumberConfirmed] = @{nameof(ApplicationUser.PhoneNumberConfirmed)},
-                    [TwoFactorEnabled] = @{nameof(ApplicationUser.TwoFactorEnabled)}
-                    WHERE [Id] = @{nameof(ApplicationUser.Id)}", user);
+                await connection.ExecuteAsync($@"UPDATE `ApplicationUser` SET
+                    `UserName` = @{nameof(ApplicationUser.UserName)},
+                    `NormalizedUserName` = @{nameof(ApplicationUser.NormalizedUserName)},
+                    `Email` = @{nameof(ApplicationUser.Email)},
+                    `NormalizedEmail` = @{nameof(ApplicationUser.NormalizedEmail)},
+                    `EmailConfirmed` = @{nameof(ApplicationUser.EmailConfirmed)},
+                    `PasswordHash` = @{nameof(ApplicationUser.PasswordHash)},
+                    `PhoneNumber` = @{nameof(ApplicationUser.PhoneNumber)},
+                    `PhoneNumberConfirmed` = @{nameof(ApplicationUser.PhoneNumberConfirmed)},
+                    `TwoFactorEnabled` = @{nameof(ApplicationUser.TwoFactorEnabled)}
+                    WHERE `Id` = @{nameof(ApplicationUser.Id)}", user);
             }
 
             return IdentityResult.Success;
@@ -175,11 +174,11 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
-                    WHERE [NormalizedEmail] = @{nameof(normalizedEmail)}", new { normalizedEmail });
+                return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM `ApplicationUser`
+                    WHERE `NormalizedEmail` = @{nameof(normalizedEmail)}", new { normalizedEmail });
             }
         }
 
@@ -247,17 +246,19 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                var normalizedName = roleName.ToUpper();
-                var roleId = await connection.ExecuteScalarAsync<int?>($"SELECT [Id] FROM [ApplicationRole] WHERE [NormalizedName] = @{nameof(normalizedName)}", new { normalizedName });
+                string normalizedName = roleName.ToUpper();
+                int? roleId = await connection.ExecuteScalarAsync<int?>($"SELECT `Id` FROM `ApplicationRole` WHERE `NormalizedName` = @{nameof(normalizedName)}", new { normalizedName });
                 if (!roleId.HasValue)
-                    roleId = await connection.ExecuteAsync($"INSERT INTO [ApplicationRole]([Name], [NormalizedName]) VALUES(@{nameof(roleName)}, @{nameof(normalizedName)})",
+                {
+                    roleId = await connection.ExecuteAsync($"INSERT INTO `ApplicationRole`(`Name`, `NormalizedName`) VALUES(@{nameof(roleName)}, @{nameof(normalizedName)})",
                         new { roleName, normalizedName });
+                }
 
-                await connection.ExecuteAsync($"IF NOT EXISTS(SELECT 1 FROM [ApplicationUserRole] WHERE [UserId] = @userId AND [RoleId] = @{nameof(roleId)}) " +
-                    $"INSERT INTO [ApplicationUserRole]([UserId], [RoleId]) VALUES(@userId, @{nameof(roleId)})",
+                await connection.ExecuteAsync($"IF NOT EXISTS(SELECT 1 FROM `ApplicationUserRole` WHERE `UserId` = @userId AND `RoleId` = @{nameof(roleId)}) " +
+                    $"INSERT INTO `ApplicationUserRole`(`UserId`, `RoleId`) VALUES(@userId, @{nameof(roleId)})",
                     new { userId = user.Id, roleId });
             }
         }
@@ -266,12 +267,14 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                var roleId = await connection.ExecuteScalarAsync<int?>("SELECT [Id] FROM [ApplicationRole] WHERE [NormalizedName] = @normalizedName", new { normalizedName = roleName.ToUpper() });
+                int? roleId = await connection.ExecuteScalarAsync<int?>("SELECT `Id` FROM `ApplicationRole` WHERE `NormalizedName` = @normalizedName", new { normalizedName = roleName.ToUpper() });
                 if (!roleId.HasValue)
-                    await connection.ExecuteAsync($"DELETE FROM [ApplicationUserRole] WHERE [UserId] = @userId AND [RoleId] = @{nameof(roleId)}", new { userId = user.Id, roleId });
+                {
+                    await connection.ExecuteAsync($"DELETE FROM `ApplicationUserRole` WHERE `UserId` = @userId AND `RoleId` = @{nameof(roleId)}", new { userId = user.Id, roleId });
+                }
             }
         }
 
@@ -279,10 +282,10 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                var queryResults = await connection.QueryAsync<string>("SELECT r.[Name] FROM [ApplicationRole] r INNER JOIN [ApplicationUserRole] ur ON ur.[RoleId] = r.Id " +
+                IEnumerable<string> queryResults = await connection.QueryAsync<string>("SELECT r.`Name` FROM `ApplicationRole` r INNER JOIN `ApplicationUserRole` ur ON ur.`RoleId` = r.Id " +
                     "WHERE ur.UserId = @userId", new { userId = user.Id });
 
                 return queryResults.ToList();
@@ -293,11 +296,15 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
-                var roleId = await connection.ExecuteScalarAsync<int?>("SELECT [Id] FROM [ApplicationRole] WHERE [NormalizedName] = @normalizedName", new { normalizedName = roleName.ToUpper() });
-                if (roleId == default(int)) return false;
-                var matchingRoles = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM [ApplicationUserRole] WHERE [UserId] = @userId AND [RoleId] = @{nameof(roleId)}",
+                int? roleId = await connection.ExecuteScalarAsync<int?>("SELECT `Id` FROM `ApplicationRole` WHERE `NormalizedName` = @normalizedName", new { normalizedName = roleName.ToUpper() });
+                if (roleId == default(int))
+                {
+                    return false;
+                }
+
+                int matchingRoles = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM `ApplicationUserRole` WHERE `UserId` = @userId AND `RoleId` = @{nameof(roleId)}",
                     new { userId = user.Id, roleId });
 
                 return matchingRoles > 0;
@@ -308,10 +315,10 @@ namespace Biible.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new SqlConnection(_connectionString))
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
-                var queryResults = await connection.QueryAsync<ApplicationUser>("SELECT u.* FROM [ApplicationUser] u " +
-                    "INNER JOIN [ApplicationUserRole] ur ON ur.[UserId] = u.[Id] INNER JOIN [ApplicationRole] r ON r.[Id] = ur.[RoleId] WHERE r.[NormalizedName] = @normalizedName",
+                IEnumerable<ApplicationUser> queryResults = await connection.QueryAsync<ApplicationUser>("SELECT u.* FROM `ApplicationUser` u " +
+                    "INNER JOIN `ApplicationUserRole` ur ON ur.`UserId` = u.`Id` INNER JOIN `ApplicationRole` r ON r.`Id` = ur.`RoleId` WHERE r.`NormalizedName` = @normalizedName",
                     new { normalizedName = roleName.ToUpper() });
 
                 return queryResults.ToList();
