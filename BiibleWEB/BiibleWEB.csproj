@@ -6,13 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\**" />
     <Compile Remove="Models\**" />
-    <Content Remove="Data\**" />
     <Content Remove="Models\**" />
-    <EmbeddedResource Remove="Data\**" />
     <EmbeddedResource Remove="Models\**" />
-    <None Remove="Data\**" />
     <None Remove="Models\**" />
   </ItemGroup>
 
@@ -32,6 +28,11 @@
   <ItemGroup>
     <ProjectReference Include="..\BiibleDATA\BiibleDATA.csproj" />
     <ProjectReference Include="..\BiibleMODELS\BiibleMODELS.csproj" />
+    <ProjectReference Include="..\BiibleREST\BiibleREST.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\qrcode-js\" />
   </ItemGroup>
 
 </Project>

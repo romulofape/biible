@@ -22,6 +22,13 @@ namespace BiibleWEB.Controllers
             return View();
         }
 
+        public IActionResult Cliente()
+        {
+            ViewData["Message"] = "Cliente";
+
+            return View();
+        }
+
         public IActionResult Contact()
         {
             ViewData["Message"] = "Your contact page.";

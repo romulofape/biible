@@ -6,19 +6,19 @@ namespace Biible.Rest
 {
     public class ClienteREST
     {
-        public List<ClienteREST> ListarTodosClientes()
+        public List<ClienteModel> ListarTodosClientes()
         {
-            List<ClienteREST> retorno = new List<ClienteREST>();
+            List<ClienteModel> retorno = new List<ClienteModel>();
             string json = WebAPI.RequestGET("buscartodos", string.Empty);
-            retorno = JsonConvert.DeserializeObject<List<ClienteREST>>(json);
+            retorno = JsonConvert.DeserializeObject<List<ClienteModel>>(json);
             return retorno;
         }
 
-        public ClienteREST Carregar(int? id)
+        public ClienteModel Carregar(int? id)
         {
-            ClienteREST retorno = new ClienteREST();
+            ClienteModel retorno = new ClienteModel();
             string json = WebAPI.RequestGET("buscarregistro", id.ToString());
-            retorno = JsonConvert.DeserializeObject<ClienteREST>(json);
+            retorno = JsonConvert.DeserializeObject<ClienteModel>(json);
             return retorno;
         }
 
