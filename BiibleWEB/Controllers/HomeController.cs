@@ -1,6 +1,10 @@
-﻿using BiibleWEB.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Biible.Models;
 
 namespace BiibleWEB.Controllers
 {
@@ -8,48 +12,23 @@ namespace BiibleWEB.Controllers
     {
         public IActionResult Index()
         {
-            ClienteModel objCliente = new ClienteModel();
-            ViewBag.ListaClientes = objCliente.ListarTodosClientes();
-
             return View();
         }
 
-        [HttpGet]
-        public IActionResult Registrar(int? id)
+        public IActionResult About()
         {
-            if (id != null)
-            {
-                ViewBag.Registro = new ClienteModel().Carregar(id);
-            }
+            ViewData["Message"] = "Your application description page.";
 
             return View();
         }
 
-        [HttpPost]
-        public IActionResult Registrar(ClienteModel dados)
+        public IActionResult Contact()
         {
-            dados.Inserir();
+            ViewData["Message"] = "Your contact page.";
+
             return View();
         }
 
-        public IActionResult Excluir(int id)
-        {
-            ViewData["ClienteID"] = id.ToString();
-            return View();
-        }
-
-        public IActionResult ExcluirCliente(int id)
-        {
-            new ClienteModel().Excluir(id);
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
