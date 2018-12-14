@@ -41,11 +41,9 @@ namespace BiibleAPI.Controllers
                 // de assinaturas digitais para tokens
                 SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                //TODO Romulo - Alterar o dados abaixo
-
                 JwtSecurityToken token = new JwtSecurityToken(
-                     issuer: "macoratti.net",
-                     audience: "macoratti.net",
+                     issuer: "biible.com.br",
+                     audience: "biible.com.br",
                      claims: claims,
                      expires: DateTime.Now.AddMinutes(30),
                      signingCredentials: creds);

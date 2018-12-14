@@ -43,8 +43,8 @@ namespace BiibleAPI
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "macoratti.net",
-                    ValidAudience = "macoratti.net",
+                    ValidIssuer = "biible.com.br",
+                    ValidAudience = "biible.com.br",
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(Configuration["SecurityKey"]))
                 };
